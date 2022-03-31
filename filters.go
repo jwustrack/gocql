@@ -59,11 +59,7 @@ func WhiteListHostFilter(hosts ...string) HostFilter {
 // BlackListHostFilter filters incoming hosts by checking that their address is
 // not in the initial hosts blacklist.
 func BlackListHostFilter(hosts ...string) HostFilter {
-	hostInfos, err := addrsToHosts(hosts, 9042, nopLogger{})
-	if err != nil {
-		// dont want to panic here, but rather not break the API
-		panic(fmt.Errorf("unable to lookup host info from address: %v", err))
-	}
+	hostInfos, _ := addrsToHosts(hosts, 9042, nopLogger{})
 
 	m := make(map[string]bool, len(hostInfos))
 	for _, host := range hostInfos {
