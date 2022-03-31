@@ -27,6 +27,28 @@ func TestFilter_WhiteList(t *testing.T) {
 	}
 }
 
+func TestFilter_BlackList(t *testing.T) {
+	f := BlackListHostFilter("127.0.0.1", "127.0.0.2")
+	tests := [...]struct {
+		addr   net.IP
+		accept bool
+	}{
+		{net.ParseIP("127.0.0.1"), false},
+		{net.ParseIP("127.0.0.2"), false},
+		{net.ParseIP("127.0.0.3"), true},
+	}
+
+	for i, test := range tests {
+		if f.Accept(&HostInfo{connectAddress: test.addr}) {
+			if !test.accept {
+				t.Errorf("%d: should not have been accepted but was", i)
+			}
+		} else if test.accept {
+			t.Errorf("%d: should have been accepted but wasn't", i)
+		}
+	}
+}
+
 func TestFilter_AllowAll(t *testing.T) {
 	f := AcceptAllFilter()
 	tests := [...]struct {

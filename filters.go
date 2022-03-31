@@ -55,3 +55,22 @@ func WhiteListHostFilter(hosts ...string) HostFilter {
 		return m[host.ConnectAddress().String()]
 	})
 }
+
+// BlackListHostFilter filters incoming hosts by checking that their address is
+// not in the initial hosts blacklist.
+func BlackListHostFilter(hosts ...string) HostFilter {
+	hostInfos, err := addrsToHosts(hosts, 9042, nopLogger{})
+	if err != nil {
+		// dont want to panic here, but rather not break the API
+		panic(fmt.Errorf("unable to lookup host info from address: %v", err))
+	}
+
+	m := make(map[string]bool, len(hostInfos))
+	for _, host := range hostInfos {
+		m[host.ConnectAddress().String()] = true
+	}
+
+	return HostFilterFunc(func(host *HostInfo) bool {
+		return !m[host.ConnectAddress().String()]
+	})
+}
